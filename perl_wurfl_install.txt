@@ -1,0 +1,221 @@
+#
+# perl_wurfl.cgi & site_wurfl.cgi Installation Instructions:
+#
+# The following are general instructions for installing and running the perl_wurfl.cgi &
+# site_wurfl.cgi scripts.
+#
+# Copyright Notice:
+#
+#           WURFL to Perl Instructions version 4.0.1
+#              Copyright 2009-2014 - OpenSiteMobile
+#                    All rights reserved
+#
+# Author: Dwight Vietzke
+# Email:  dwight_vietzke@yahoo.com
+#
+# ==========================================================================
+#     http://www.opensite.mobi
+# ==========================================================================
+#
+# Installation Quick List:
+
+# 1.  Upload script files in 'ASCII' only.  Uploading in binary is a no-no!
+
+# 2.  Install the scripts in an executable folder. Make sure your directory is set to
+#     execute perl scripts, (verify with your hosting company if you are not sure).
+#     - examples: 'cgi-bin', 'cgi', 'cgi-local'
+
+# 3.  Check your server's 'path to Perl' and adjust each script's first line; it 
+#	  is typically something like #!/usr/bin/perl or #!C:/Perl/bin/perl
+#     - Set the path to the one for your web server -> the first line of each script
+#     - other examples:  #!/usr/local/bin/perl, #!/usr/local/bin/perl5
+#     - UNIX servers -> this is required, Windows/NT servers -> may not be required
+
+# 4.  The perl_wurfl.cgi & site_wurfl.cgi scripts require Perl 5.8.1 or above...
+#     - Make sure the path you set for item '3' is to Perl 5.8.1 or higher.
+#     - This applies for both UNIX and Windows/NT servers
+#     - Perl 5.8.0 is required for full Unicode (utf-8) support
+
+# 5.  Modify the script(s) in 'text only' mode using an editor which produces
+#	  UNIX UTF-8 encoded text documents, ie:
+#     - SuperEdi by http://www.wolosoft.com/superedi
+#     - Komodo Edit by http://www.activestate.com/
+
+# 6.  Make sure you know where the script is running from...
+#     - File and folder name typo's, or using a wrong url to call the script
+#       are the most common causes of 'file not found' errors.
+#
+# 7.  UNIX servers -> Set the script file permissions to '755' using 'chmod'.
+#     - The default '.cgi' file extension should work in most (all) cases.
+
+# 8.  Windows/NT servers -> File and/or folder permissions 'may' need to be set in order
+#     for the script to execute. This can ONLY be done by a server admin person.
+#     - But first, rename the default '.cgi' file extension name of this script to '.pl'
+#       (or just give the script a try as '.cgi' and see what happens).
+#     - The '.pl' extension should work for any Windows/NT server where Perl scripts are
+#       allowed to run via a file extension.  Some Win/NT servers will allow either '.pl' or '.cgi'.
+
+# 9.  Troubleshooting the script:
+#     - The script 'text' appears. This means your server is not executing the script.
+#       Check your ISP documentation for help.  Be sure your script is in the location
+#       the ISP requires and that Perl scripts are allowed to execute.
+#     - On Unix/Linux servers, this may mean your have not set the chmod to 755.
+#     - 500 Server error:
+#       a) Did you upload in ASCII?
+#       b) The top line does not point to Perl 5. See step '3' above.
+#       c) Perl is not installed or the server is not correctly configured.
+#       d) If you unzipped the zip file on a Linux or Unix machine, did you use the
+#          unzip -a switch to force an ASCII unzipping?
+
+# 10. Here are some execellent resources for Perl basics:
+#
+#	http://cgi.resourceindex.com/Programs_and_Scripts/Perl/
+#	http://developer.earthweb.com/
+#	http://www.perl.com/pub/
+#	http://www.zdnet.com/devhead/resources/scriptlibrary/perlscript/
+#	http://www.cpan.org/
+#	http://www.perl.org/
+#	http://www.awsd.com/scripts
+#	http://www.worldwidemart.com/scripts
+
+# 11. Here are some more excellent ref. sites:
+#
+#	http://perl.apache.org/			    mod_perl
+#	http://take23.org/			        mod_perl
+#	http://httpd.apache.org/		    Apache
+#	http://www.perl.com/			    Perl
+#	http://www.activestate.com/		    Win32 perl
+#	http://www.modssl.org/			    mod_ssl
+#	http://www.openssl.org/			    OpenSSL
+#	http://www.apache-asp.org/		    Apache::ASP
+#	http://perl.apache.org/embperl/	    Embperl
+#	http://www.masonhq.com/			    HTML::Mason
+#	http://www.template-toolkit.org/    Template::Toolkit
+#	http://www.mysql.com/			    MySQL
+
+# ==========================================================================
+#	WURLF to Perl Installation Instructions...
+# ==========================================================================
+
+# 1.    Download the latest WURFL-Perl Demo file from:
+#       http://code.google.com/p/mobilesiteos/downloads/list
+#
+#       - Extract the compressed file to a working (local project) folder and rename
+#         perl_wurfl.cgi and site_wurfl.cgi, .cgi or .pl according to your server's
+#         preference.
+#       - In a text editor, change the 'path to Perl' for perl_wurfl.cgi & site_wurfl.cgi
+#         as described above.
+#       - In a text editor, change the $config_vars->{'wurfl_url'} parameter in the
+#         WURFL::Config file to point to your download access url for WURFL XML Data,
+#         as provided by ScientiaMobile Inc. (the copyright holder for WURFL XML Data).
+#         Make sure you use the '.xml.gz' compressed version of the download file.
+#
+#           wurfl_url => 'http://sourceforge.net/projects/wurfl/files/WURFL/2.3.3/wurfl-2.3.3.gz/download',
+#
+
+# 2.    Create a MySQL database on the server you intend to load 'perl_wurfl.cgi' and
+#	    'site_wurfl.cgi' to.
+#
+#       - Add the db name, host, user and password information for the just created db
+#         to your copy of the WURFL::Config module (cgi-bin/lib/WURFL/Config.pm).
+#         The 'as shipped' names are as follows:
+#
+#           db_descriptor => "DBI:mysql:database=wurfl:host=localhost",
+#           db_username => 'wurfl_user',
+#           db_password => 'wurfl_pass',
+#
+#       ...where 'wurfl' is our db name, 'localhost' is our server.
+#
+
+# 3.    Ftp the contents of the downloaded 'cgi-bin' folder into your 'cgi-bin' folder
+#       (ie: executable folder) and set permissions as described above. Note: not all
+#       the modules in the 'cgi-bin/lib' folder may be necessary, as your server's perl
+#       installation may already include them. So at a minimum, upload the '/lib/WURFL'
+#       and '/lib/MSOS' folders, then go to the next step. The '/lib/WURFL' foleder
+#       needs 'read/write' permissions (755) by the perl_wurfl.cgi script. Use
+#       'site_simple.cgi' to test for needed Perl modules. Please be aware, it is best
+#       not to duplicate modules already installed on the server. If you get errors
+#       about missing modules, then just upload the include ones from your download
+#       (in '/lib') as needed.
+#
+#       - Ftp'ing the contents of the downloaded 'htdocs' folder is not necessary for
+#         installation as it only contains this file and a background 'index' page.
+#       - Run 'site_simple.cgi' and verify that the Algorithm::Diff, String::Diff, JSON,
+#         JSON::PP::PP, HTML::Template and Text::Levenshtein Perl modules are available.
+#         If not, upload them now.
+#	    - Run 'perl_wurfl.cgi' or 'perl_wurfl.pl'. A simple start page should appear.
+#       - If 'perl_wurfl.cgi/pl' doesn't run correctly, review steps 9 and 10 above
+#         for simple corrective actions.
+
+# 4.	Start the WURFL via Perl/MySQL creation:
+#
+#	    - With the 'perl_wurfl.cgi' script working, follow the prompts to watch the
+#         WURFL to MySQL process. The first prompt is 'Download WURFL File'. Click it
+#         and the process of downloading the latest WURLF XML data file should start.
+#       - If you encounter errors, carefully review the message(s) provided (if any)
+#         for clues as to what went wrong. No internet connection will bring you to
+#         the 'Check local file' prompt. Establish the connection and click:
+#
+#           'Check local file' -> 'Download WURFL File'.
+
+# 5.    If things aren't working, many times permissions errors, incorrect paths or
+#       missing files are the problem and can be fixed quickly. Read the error carefully.
+#       Reset permissions and/or re-upload files as necessary. A common error is:
+#
+#           &WURFL::Setup::get_wurfl -> gunzip failed: input file './lib/WURFL/wurfl_xxxx'
+#           does not exist.
+#
+#       The file probably doesn't exist because the perl_wurfl.cgi script couldn't
+#       'write' this tmp file in the first place. Set permissions on the WURFL folder
+#       accordingly and try again.
+#	    - The script goes through the migration process in individual steps because of
+#         memory and CPU limitations as well as for ease of debugging. Some steps take
+#         a long...long... time to complete. Please be patient! Some take as long as
+#         several minute (at least on my ancient laptop).
+#	    - Click each successive step and submit your 'best guess' answers to the step
+#         4 prompt. The default 'Submit' is usually good enough, but you are welcome
+#         to 'fix' these noted inconsistencies now.
+#	    - Step 9 of perl_wurfl.cgi starts the WURLF to MySQL part of our database
+#         migration. If you haven't created a MySQL db, now is the time to do it and
+#         make sure MySQL is running. Make sure you have already added the db name,
+#         host, user and password information to our WURFL::Config module. The script
+#         will need "database admin" privileges to drop and create tables in your new
+#         MySQL WURFL database. When the perl_wurlf.cgi script is completely done, it
+#         is best to set the MSOS::Config file to a user with "read only" privileges.
+#       - If at some point you run into a problem with database access, just copy the
+#         current browser url from the address bar and attempt to correct the problem.
+#
+#           like -> http://your_website_domain.com/cgi-bin/perl_wurfl.cgi?step=9
+#
+#       - Then, when you think the problem is resolved, use that url and continue on
+#         with your database creation or loading.
+#	    - Continue on through the following steps to load table information and data
+#         to your new MySQL db.
+
+# 6.    Start the 'site_wurfl.cgi' script by clicking the last link in the perl_wurfl.cgi
+#       process.
+#
+#	    - Run 'site_wurfl.cgi' or 'site_wurfl.pl'. A page should appear showing the user
+#         agent of your current browser and the 'WURFL Data' generated device capabilities
+#         as found via your new MySQL db of WURFL Data.
+#	    - The output info is nearly identical (usually varies by order of results),
+#         to any other available WURFL API, only provided as a Perl hash.
+#       - Once you have verified that your WURFL MySQL Db is loaded and working, you
+#         may delete the 'ua_atts.pm' and 'ua_caps.pm' files from the WURFL folder in
+#         'cgi-bin/lib' (or your equivalent).
+#	    - Note: 'site_wurfl.cgi' serves as test script of your new installation. More
+#         importantly, it also serves as an example script of how to implement 'WURFL
+#         via Perl/MySQL' into your Perl code. 
+
+# 7.    Disable the 'perl_wurfl.cgi' script:
+#
+#	    - Once you verify that everything is running properly, you need to disable the
+#         'perl_wurfl.cgi' or password protect it somehow. Now is a good time to 'back-up'
+#         your data too. It is extremely dangerous to allow others to access this script
+#         without your knowledge, since it has the potential to erase all data and
+#         database entries at any given time. It is also a huge resource hog if someone
+#         was to constantly calling it to make calculations, whether or not they could write
+#         the info to your MySQL db. So it is also essential to also change MySQL access via
+#         MSOS::Config to a user with "read only" privileges. Consider yourself warned.
+
+#       Hope you find these scripts useful!

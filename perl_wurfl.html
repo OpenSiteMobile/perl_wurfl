@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8" />
+<meta name="handheldfriendly" content="true" />
+<meta name="mobileoptimized"  content="width" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="WURFL Device data via JSON, Perl and MySQL!" />
+<meta name="author" content="Dwight Vietzke" />
+
+    <title>WURFL via Perl</title>
+
+<style type="text/css">
+/* <![CDATA[ */
+
+	/*
+	 *	Note: Using an external file is fine, but it is best to leave this css here!
+	 *	This prevents a "blank page" showing on slow connections.
+	*/
+	html, body, table, div, article, section, fieldset {
+		font-family: "Comic Sans MS", cursive, sans-serif
+	}
+	html, body {
+		background-color: #A1A1A1;
+	}
+	body {
+		background-image: url(./mobilesiteos/images/grid_bg.png);
+		background-repeat: repeat-x;
+	}
+	#body {
+		display: none;
+	}
+
+	#no_javascript {
+		background-color: #FFF;
+		border: 2px solid #999;
+		border-radius: 0.4em;
+		margin-left: auto;
+		margin-right: auto;
+		width: 60%;
+	}
+	#no_javascript > i {
+		color: red;
+	}
+
+/* ]]> */
+</style>
+
+<link rel='shortcut icon' href='./mobilesiteos/images/osm.ico' />
+
+<script src="./mobilesiteos/msos/base.min.js"></script>
+
+<script src="./mobilesiteos/config.js"></script>
+
+</head>
+<body>
+
+<noscript>
+	<h3 id="no_javascript">
+		<i class="fa fa-ban"></i> We're sorry, but this site requires JavaScript be enabled!
+	</h3>
+</noscript>
+
+<div id='body'>
+
+	<div id="rotate_marquee">
+		<div id='marquee'>OpenSiteMobile</div>
+		<div id='slogan'>Open source software for the mobile web!</div>
+	</div>
+
+	<div id="header" class="msos_navbar">
+		<ul class="breadcrumb">
+		   <li><a class='btn btn-msos' href='./index.html' title='Site index page'><i class="fa fa-home"></i></a></li>
+		</ul>
+		<ul class="menus">
+			<li><a class="btn btn-msos" href='./wurfl_json.html' title="Wurfl data as JSON">As JSON</a></li>
+			<li><a class="btn btn-msos active" href='./perl_wurfl.html'	title="About Wurfl via Perl">About</a></li>
+		</ul>
+	</div>
+
+	<div id="content">
+		<h2>WURFL Data via Perl and MySQL</h2>
+
+		<div class="pgrph well">
+			<p>
+				The WURFL XML Mobile Device Data file is arguably the best and most complete
+				reference for mobile device capabilities and as such, is a very large XML file.
+				Thus the basic premise behind our Perl-WURFL application is to do as much
+				of the hard data filtering with Perl 'setup' script(s) in an effort to create
+				a relatively 'quick and easy' way to access WURFL Data.
+			</p>
+
+			<p>
+				The first step was to condense WURFL Data down to just what we need for our
+				particular project. Large projects may need to have all device information
+				readily available, but many times a project just needs certain capabilities
+				exposed. Below is a snippet from our configuration file which shows several
+				configuration settings. 'wurfl_groups' is probably the most important, as it
+				specifies which WURFL 'group' data types will be included in the final WURFL
+				Data output. Adjust accordingly to your needs. The advantage is that data not
+				required will be filtered away, making your final database smaller of whatever
+				persuasion much smaller.
+			</p>
+		</div>
+		
+		<pre style='font-size:x-small;'>
+# Our configuration variables...
+$config_vars = {
+
+	db_descriptor => "DBI:mysql:database=wurfl:host=localhost", 
+	db_username => 'wurfl_user',
+	db_password => 'wurfl_pass',
+
+	wurfl_action => 'continue',
+	wurfl_path => './lib/WURFL/',
+	wurfl_status => '',
+	# Set this to your WURFL customer specific download valt url
+	wurfl_url => 'http://sourceforge.net/projects/wurfl/files/WURFL/2.3/wurfl-2.3.xml.gz/download',
+	# Stats for file at wurfl_file
+	wurfl_local => [0, 0],
+	# Stats for file at wurfl_url
+	wurfl_remote => [0, 0],
+	# WURFL groups to include in output database (add or subtract as you need access to values)
+	wurfl_groups => [
+		'product_info', 'wml_ui', 'chtml_ui', 'xhtml_ui', 'html_ui', 'css', 'ajax', 'markup',
+		'cache', 'display', 'image_format', 'bugs', 'wta', 'security', 'bearer', 'storage',
+		'object_download', 'playback', 'wap_push', 'drm', 'streaming', 'mms', 'j2me', 'sms',
+		'sound_format', 'flash_lite', 'transcoding', 'rss', 'pdf', 'chips', 'smarttv'
+	],
+	# Sets 'Data::Dumper' indentation level, (0 is none)
+	wurfl_dump_indent => 1,
+	wurfl_tables => {},
+	......
+	....
+	..
+};
+		</pre>
+		
+		<div class="pgrph well">
+			The configuration file also includes code for 'encoding' common string segments
+			of 'user agent' text into abbreviated ones. Here is a sample:
+		</div>
+		
+		<pre style='font-size:x-small;'>
+# Sub to encode common long string segments in user agents
+sub user_agent {
+
+	# Note:	This works because we use this subroutine on all
+	#		incoming user agent strings, before device prediction
+
+	# Input a user agent string
+	my $ua = shift;
+	
+	# Remove non word characters (they don't add an information)
+	$ua =~ s/_//g;
+	$ua =~ s/\W+//g;
+
+	# Make everything lowercase
+	# (since MySQL, others? consider upper and lower case character matches the same)
+	$ua = lc ($ua);
+
+	# Encode many common long strings - Order is important!
+	# This is vital since text comparing algorithyms used later are cpu/memory intensive
+	# (yes this is tedious, but saves'lots' of db space and is easy to append new regex's to)
+	$ua =~ s/^3gsonyericsson/3gse_/;
+	$ua =~ s/^sonyericsson/snye_/;
+	$ua =~ s/^acsnf30ne/ac31_/;
+	$ua =~ s/^acer_iconia/aci_/;
+	$ua =~ s/^acer_liquid/acl_/;
+	$ua =~ s/^alcatel_ot/alot_/;
+	$ua =~ s/^alcatel_th/alth_/;
+	$ua =~ s/^amazon_kindle/amkn_/;
+	$ua =~ s/^android/and_/;
+	......
+	....
+	..
+		</pre>
+
+		<div class="pgrph well">
+			<p>
+				The configuration file is important because we use it to define and then
+				access our WURFL Data via Perl. Our 'perl_wurfl.cgi' script is used to create
+				a MySQL Db of WURFL Data, based on your needs. The 'perl_wurfl.cgi' script will
+				filter the latest WURFL XML Data file downloaded, encoding and condensing user
+				agent strings. There is a lot going on in the background when you run
+				'perl_wurfl.cgi' and the best way to see it is to install and run the script.
+				Watch as it steps through each part of the process and you will get a feel for
+				how it works.
+			</p>
+
+			<div style="padding: 5px 20px 5px 20px; font-size: smaller; text-align: left;">
+				Please note: the 'perl_wurfl.cgi' script can be very slow, so be patient while it is runnning.
+				It also likes lots of memory. Remember, I said we do the hard work with 'perl_wurfl.cgi' so the
+				the normal data retrieval process is easy ;)
+			</div>
+
+			<p>
+				So we are trying to create a very simple and efficient MySQL database of WURFL
+				Device data. You will create an empty MySQL database and set the corresponding
+				db name, host, user, password parameters in our configuration file: 'WURLF::Config'.
+				Then the 'perl_wurfl.cgi' script will be run to create tables and add data for
+				your installation of WURFL data in MySQL. The final user agent detection process
+				will be through very fast db lookups via MySQL 'SELECT' statements.
+			</p>
+
+			<p>
+				The 'perl_wurfl.cgi' script does some fancy Perl comparisons and produces
+				shortened 'uniquely' encoded user agent based keys. This is the reason your
+				application will need to use the exact same configuration file: WURFL::Config.
+				This is also the part of our script which is different from other WURFL-Perl
+				Database extractions. The original WURFL XML Mobile Device Data extraction
+				programs used "device id's" which were searched by cascading device similarities.
+				From these keys, we seek a 'best match' to the incoming user agent of the
+				website visitor. This all works because we use a combination of brute force
+				searches (3 initial character lookup in MySQL) and textual data comparison.
+				It is important to note that our process produces a best match regardless of
+				differences between known and new user agent strings. This is done by using the
+				Perl 'Text::Levenshtein' module for determining string 'likeness' as opposed to
+				number of character matches, etc. This process is better than most (all?) other
+				processes I have seen to date.
+			</p>
+
+			<p>
+				From this point on, our process works the same as other WURFL API's. We roll up
+				the capabilities by combining each successive 'fall back' user agent (device
+				id in WURFL terms) and provide the current browser capabilities in Perl hash
+				form. Our process provides better 'new device' detection for new user agents
+				than those which use string matching alone.  
+			</p>
+
+			<p>
+				Also included in our download is the 'site_wurfl.cgi' script. This is actually
+				the more important of the two. Our 'site_wurfl.cgi' script demo's our WURFL
+				Data via Perl/MySQL capabilities, while giving a realistic example of how it
+				might be integrated into other Perl scripts. The 'perl_wurfl.cgi' script is
+				only run when you download and update to the latest WURFL XML Data file. Thus
+				'perl_wurfl.cgi' is just a 'helper' script and should not be given any website
+				user access of any kind.
+			</p>
+
+			<p>
+				Use the included 'site_wurfl.cgi' as a guide to how to access your WURFL Data.
+				It is also a quick and convenient way to test configuration changes or new devices
+				against current WURFL Data. Or just use a 'User Agent Switcher' in your favorite
+				browser and watch the process at work.
+			</p>
+		</div>
+
+		<h3>
+			View code at: <a href="https://github.com/OpenSiteMobile/perl_wurfl/">https://github.com/OpenSiteMobile/perl_wurfl/</a>
+		</h3>
+		<h3>
+			Installation: <a href="./perl_wurfl_install.txt">perl_wurfl_install.txt</a>
+		</h3>
+
+	</div>
+
+	<div id='social_ties'></div>
+
+	<div id="footer" class="msos_navbar">
+		<ul class="breadcrumb">
+		   <li><a class='btn btn-msos' href='./index.html' title='Site index page'><i class="fa fa-home"></i></a></li>
+		</ul>
+		<ul class="menus">
+			<li><a class="btn btn-msos" href='./wurfl_json.html' title="Wurfl data as JSON">As JSON</a></li>
+			<li><a class="btn btn-msos active" href='./perl_wurfl.html' title="About Wurfl via Perl">About</a></li>
+		</ul>
+	</div>
+
+	<div id='google_ad'>
+		<script> msos.load_adsense(); </script>
+	</div>
+
+	<script>
+		msos.onload_functions.push(
+			function () {
+				"use strict";
+
+				msos.console.info('Content: perl_wurlf.html loaded!');
+
+				jQuery('#header > ul >li, #footer > ul >li').css('display', 'block');
+				jQuery('#body').css('display', 'block');
+			}
+		);
+	</script>
+
+</div> <!-- end 'body' div -->
+
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8" />
+<meta name="handheldfriendly" content="true" />
+<meta name="mobileoptimized"  content="width" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="WURFL Device data via JSON, Perl and MySQL!" />
+<meta name="author" content="Dwight Vietzke" />
+
+    <title>WURFL Data via JSON</title>
+
+<style type="text/css">
+/* <![CDATA[ */
+
+	/*
+	 *	Note: Using an external file is fine, but it is best to leave this css here!
+	 *	This prevents a "blank page" showing on slow connections.
+	*/
+	html, body, table, div, article, section, fieldset {
+		font-family: "Comic Sans MS", cursive, sans-serif
+	}
+	html, body {
+		background-color: #A1A1A1;
+	}
+	body {
+		background-image: url(./mobilesiteos/images/grid_bg.png);
+		background-repeat: repeat-x;
+	}
+	#body {
+		display: none;
+	}
+
+	#no_javascript {
+		background-color: #FFF;
+		border: 2px solid #999;
+		border-radius: 0.4em;
+		margin-left: auto;
+		margin-right: auto;
+		width: 60%;
+	}
+	#no_javascript > i {
+		color: red;
+	}
+
+/* ]]> */
+</style>
+
+<link rel='shortcut icon' href='./mobilesiteos/images/osm.ico' />
+
+<script src="./mobilesiteos/msos/base.min.js"></script>
+
+<script src="./mobilesiteos/config.js"></script>
+
+</head>
+<body>
+
+<noscript>
+	<h3 id="no_javascript">
+		<i class="fa fa-ban"></i> We're sorry, but this site requires JavaScript be enabled!
+	</h3>
+</noscript>
+
+<div id='body'>
+
+	<div id="rotate_marquee">
+		<div id='marquee'>OpenSiteMobile</div>
+		<div id='slogan'>Open source software for the mobile web!</div>
+	</div>
+
+	<div id="header" class="msos_navbar">
+		<ul class="breadcrumb">
+		   <li><a class='btn btn-msos' href='./index.html' title='Site index page'><i class="fa fa-home"></i></a></li>
+		</ul>
+		<ul class="menus">
+			<li><a class="btn btn-msos active" href='./wurfl_json.html' title="Wurfl data as JSON">As JSON</a></li>
+			<li><a class="btn btn-msos" href='./perl_wurfl.html' title="About Wurfl via Perl">About</a></li>
+		</ul>
+	</div>
+
+	<div id="content">
+
+		<section>
+			<h1><u>WURFL</u>&nbsp;Data via&nbsp;<u>JSON</u>,&nbsp;<u>Perl</u> and&nbsp;<u>MySQL</u></h1>
+
+			<div class="pgrph well">
+				<p>
+					This page demo's access to&nbsp;<u>WURFL</u>&nbsp;Data from within JavaScript via&nbsp;<u>Perl</u>&nbsp;and
+					<u>MySQL</u>. We use an&nbsp;<u>AJAX/JSON</u>&nbsp;call to our&nbsp;<u>Perl</u>&nbsp;script
+					<code>'site_wurfl.cgi'</code>, which then makes a connection to a simple&nbsp;<u>MySQL</u>&nbsp;database.
+					Our&nbsp;<code>'perl_wurfl.cgi'</code>&nbsp;script is used to initially fill and maintain this&nbsp;<u>MySQL</u>&nbsp;database.
+				</p>
+				<p>
+					Below you should see the capabilities list for your browser/device, as provided
+					by the&nbsp;<u>WURFL</u>&nbsp;Data.
+				</p>
+			</div>
+		</section>
+
+		<textarea id="wurfl_textarea" class="msos_display msos_height msos_width notranslate"></textarea>
+
+	</div>
+
+	<div id='social_ties'></div>
+
+	<div id="footer" class="msos_navbar">
+		<ul class="breadcrumb">
+		   <li><a class='btn btn-msos' href='./index.html' title='Site index page'><i class="fa fa-home"></i></a></li>
+		</ul>
+		<ul class="menus">
+			<li><a class="btn btn-msos active" href='./wurfl_json.html' title="Wurfl data as JSON">As JSON</a></li>
+			<li><a class="btn btn-msos" href='./perl_wurfl.html' title="About Wurfl via Perl">About</a></li>
+		</ul>
+	</div>
+
+	<div id='google_ad'>
+		<script> msos.load_adsense(); </script>
+	</div>
+
+	<script>
+		msos.onload_functions.push(
+			function () {
+				"use strict";
+
+				var temp_wi = 'Content: wurfl_json.html',
+					on_success,
+					on_complete;
+
+				msos.console.info(temp_wi + ' -> loaded!');
+
+				on_success = function (data, status) {
+
+					var text;
+
+					msos.console.debug(temp_wi + ' - on_success -> called.');
+
+					if (typeof data === 'object') {
+
+						text = JSON.stringify(data, null, '\t');
+
+						// Fill our textarea with WURLF Cap's data
+						jQuery('#wurfl_textarea').val(text);
+
+					} else {
+						jQuery('#wurfl_textarea').val('Error: no data received, connection: ' + status);
+					}
+				};
+
+				on_complete = function () {
+					msos.console.debug(temp_wi + ' - on_complete -> done!');
+					jQuery('#header > ul >li, #footer > ul >li').css('display', 'block');
+					jQuery('#body').css('display', 'block');
+				};
+
+				// Edit uri for your script location
+				msos.ajax_request('./mobilesiteos/cgi-bin/site_wurfl.cgi', 'json', on_success, on_complete);
+			}
+		);
+	</script>
+
+</div> <!-- end 'body' div -->
+
+</body>
+</html>
